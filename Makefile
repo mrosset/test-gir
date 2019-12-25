@@ -4,4 +4,10 @@ LDFLAGS = `pkg-config --libs  gobject-introspection-1.0 gobject-2.0`
 test: main
 	./main
 
-main:
+main: main.o
+
+.PHONY:
+
+clean:
+	-rm main.o
+	-rm main
