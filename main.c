@@ -1,12 +1,21 @@
 #include <girepository.h>
 #include <glib.h>
 
+static void print_libs(GIRepository *gir, const char *namespace) {
+  const char *path = g_irepository_get_typelib_path(gir, namespace);
+  const char *libs = g_irepository_get_shared_library(gir, namespace);
+
+  g_print("%s\n", namespace);
+  g_print("         path: %s\n", path);
+  g_print("    libraries: %s\n", libs);
+  g_print("      version: %s\n", g_irepository_get_version(gir, namespace));
+}
+
 int main(void) {
   GError *error = NULL;
   GIRepository *gir = g_irepository_get_default();
   GIBaseInfo *info;
   GIInfoType type;
-  const char *expect = "ClutterPaintNode";
 
   g_irepository_require(gir, "Clutter", "1.0", 0, &error);
 
@@ -22,11 +31,13 @@ int main(void) {
   }
 
   type = g_registered_type_info_get_g_type(info);
-  if (!g_str_equal(expect, g_type_name(type))) {
-    g_error("expected %s got %s\n", expect, g_type_name(type));
-  } else {
-    g_print("PASS\n");
-  }
+
+  g_print("base-info: %s\n", g_irepository_find_by_gtype(gir, type));
+  g_print("type-name: %s\n", g_type_name(type));
+
+  print_libs(gir, "Clutter");
+  print_libs(gir, "GLib");
+  print_libs(gir, "GObject");
 
   g_base_info_ref(info);
   return 0;
