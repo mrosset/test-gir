@@ -14,15 +14,17 @@ static void print_libs(GIRepository *gir, const char *namespace) {
 int main(void) {
   GError *error = NULL;
   GIRepository *gir = g_irepository_get_default();
-  GIBaseInfo *info;
+  GIBaseInfo *info = NULL;
   GIInfoType type;
 
+  g_irepository_require(gir, "Gtk", "3.0", 0, &error);
   g_irepository_require(gir, "Clutter", "1.0", 0, &error);
 
   if (error) {
     g_error("ERROR: %s\n", error->message);
     return 1;
   }
+
   info = g_irepository_find_by_name(gir, "Clutter", "PaintNode");
 
   if (!info) {
@@ -35,10 +37,9 @@ int main(void) {
   g_print("base-info: %s\n", g_irepository_find_by_gtype(gir, type));
   g_print("type-name: %s\n", g_type_name(type));
 
-  print_libs(gir, "Clutter");
-  print_libs(gir, "GLib");
-  print_libs(gir, "GObject");
-
+  for (char **arg = g_irepository_get_loaded_namespaces(gir); *arg; ++arg) {
+    print_libs(gir, *arg);
+  }
   g_base_info_ref(info);
   return 0;
 }
